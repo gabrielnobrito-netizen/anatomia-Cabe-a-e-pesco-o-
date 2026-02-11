@@ -1,0 +1,846 @@
+```html
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Anatomia Cabeça e Pescoço — GABRIEL NOBRE FERREIRA (IDOMED QUIXADÁ)</title>
+<style>
+:root{--bg:#0b1020;--card:#111a33;--t:#e8eefc;--m:#aab6dd;--b:#223055;--a:#60a5fa;--g:#34d399;--r:#fb7185;--y:#fbbf24;--rad:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--t)}
+.app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+@media(max-width:980px){.app{grid-template-columns:1fr}}
+aside{border-right:1px solid var(--b);padding:14px;background:linear-gradient(180deg,#0d1630,#0b1020)}
+main{padding:16px}
+h1{font-size:16px;margin:0 0 10px}
+h2{margin:0 0 6px;font-size:22px}
+.card{background:rgba(17,26,51,.86);border:1px solid var(--b);border-radius:var(--rad);padding:12px}
+.small{color:var(--m);font-size:12px;line-height:1.35}
+.nav{display:grid;gap:8px;margin-top:10px}
+.nav button,.btn{border:1px solid var(--b);background:rgba(0,0,0,.12);color:var(--t);padding:10px;border-radius:12px;cursor:pointer;text-align:left}
+.nav button.active{border-color:rgba(96,165,250,.7);background:rgba(96,165,250,.12)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:850}
+.btn.good:hover{border-color:rgba(52,211,153,.7)}
+.btn.bad:hover{border-color:rgba(251,113,133,.7)}
+.btn.warn:hover{border-color:rgba(251,191,36,.7)}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.k{font-size:11px;color:var(--m)}
+.v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:18px}
+.pill{display:inline-block;border:1px solid var(--b);border-radius:999px;padding:4px 8px;font-size:11px;color:var(--m)}
+.hr{height:1px;background:var(--b);margin:10px 0}
+.q{margin-top:10px;border:1px solid var(--b);border-radius:var(--rad);padding:12px;background:rgba(0,0,0,.08)}
+.stem{font-weight:950;font-size:14px;line-height:1.35}
+.opts{display:grid;gap:10px;margin-top:10px}
+.optRow{display:grid;grid-template-columns:1fr 44px;gap:8px;align-items:stretch}
+.opt{border:1px solid rgba(34,48,85,.9);border-radius:12px;background:rgba(255,255,255,.03);color:var(--t);padding:10px;cursor:pointer;text-align:left}
+.opt:hover{border-color:rgba(96,165,250,.6)}
+.x{border:1px solid rgba(34,48,85,.9);border-radius:12px;background:rgba(0,0,0,.14);color:var(--t);cursor:pointer}
+.x[aria-pressed="true"]{border-color:rgba(251,191,36,.9);background:rgba(251,191,36,.12)}
+.excluded .opt{opacity:.38;text-decoration:line-through}
+.opt.correct{border-color:rgba(52,211,153,.85);background:rgba(52,211,153,.10)}
+.opt.wrong{border-color:rgba(251,113,133,.85);background:rgba(251,113,133,.10)}
+label{display:block;color:var(--m);font-size:12px;margin-bottom:6px}
+select{width:100%;padding:10px;border-radius:12px;border:1px solid var(--b);background:rgba(0,0,0,.12);color:var(--t)}
+footer.sig{position:fixed;right:12px;bottom:12px;background:rgba(17,26,51,.92);border:1px solid rgba(96,165,250,.6);padding:8px 10px;border-radius:12px;font-size:11px;color:var(--m)}
+footer.sig b{color:var(--t)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>Anatomia Cabeça e Pescoço (Offline)</h1>
+    <div class="card">
+      <div style="font-weight:950">GABRIEL NOBRE FERREIRA</div>
+      <div class="small">IDOMED — QUIXADÁ</div>
+      <div class="hr"></div>
+      <div class="small">Exclusão: ✕ ao lado de cada alternativa (excluir/reativar). “Limpar exclusões” restaura.</div>
+    </div>
+
+    <div class="kpi">
+      <div class="card"><div class="k">Pontos</div><div class="v" id="kPts">0</div></div>
+      <div class="card"><div class="k">Precisão</div><div class="v" id="kAcc">0%</div></div>
+      <div class="card"><div class="k">Streak</div><div class="v" id="kStreak">0</div></div>
+      <div class="card"><div class="k">Respondidas</div><div class="v" id="kAns">0</div></div>
+    </div>
+
+    <div class="nav" id="nav"></div>
+
+    <div class="row" style="margin-top:10px">
+      <button class="btn good" id="exp">Exportar</button>
+      <button class="btn" id="imp">Importar</button>
+      <button class="btn bad" id="rst">Reset</button>
+    </div>
+    <div class="small" style="margin-top:8px">Quiz → erro gera revisão + vira Flashcard (Leitner) → revise vencidos.</div>
+  </aside>
+
+  <main>
+    <div class="row" style="justify-content:space-between;gap:12px;align-items:flex-start">
+      <div>
+        <h2 id="title">—</h2>
+        <div class="small" id="desc">—</div>
+      </div>
+      <span class="pill" id="pill">—</span>
+    </div>
+
+    <div style="height:12px"></div>
+    <section class="card" id="content"></section>
+    <div style="height:12px"></div>
+    <section class="card" id="work"></section>
+  </main>
+</div>
+
+<footer class="sig"><b>Autor:</b> Gabriel Nobre Ferreira • IDOMED Quixadá</footer>
+
+<script>
+/* ===================== CORE ===================== */
+const KEY="gnf_idomed_hcp_v3_prova25_shuffle";
+const TOP={
+  OST:"osteologia",
+  ART:"artrologia",
+  MIO:"miologia",
+  VAS:"vascular",
+  CAV:"cavidades",
+  GLD:"glandulas",
+  SEN:"sentidos",
+  TOPG:"topografica",
+  EXAM:"prova"
+};
+const LABEL={
+  [TOP.EXAM]:"QUESTÕES DE PROVA (25) — Puro Suco",
+  [TOP.OST]:"1) Osteologia do Crânio",
+  [TOP.ART]:"2) Artrologia",
+  [TOP.MIO]:"3) Miologia",
+  [TOP.VAS]:"4) Sistema Vascular",
+  [TOP.CAV]:"5) Cavidades e Compartimentos",
+  [TOP.GLD]:"6) Glândulas",
+  [TOP.SEN]:"7) Órgãos dos Sentidos",
+  [TOP.TOPG]:"8) Anatomia Topográfica"
+};
+const rev=(t,b)=>({t,b});
+const q=(id,topic,stem,opts,ans,review)=>({id,topic,stem,opts,ans,review});
+
+const defaultState=()=>({
+  pts:0,c:0,w:0,streak:0,ans:0,
+  perf:{},
+  flash:{},
+  settings:{mode:"treino", round:15, shuffle:true},
+  quiz:null,
+  page:"home"
+});
+let S=load();
+function load(){try{const r=localStorage.getItem(KEY);return r?({...defaultState(),...JSON.parse(r)}):defaultState();}catch{return defaultState();}}
+function save(){localStorage.setItem(KEY,JSON.stringify(S));}
+const now=()=>Date.now();
+const pct=(a,b)=>b?Math.round((a/b)*100):0;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+const $=sel=>document.querySelector(sel);
+function toast(msg){alert(msg);}
+
+/* ===================== ESTUDO (sem cola no quiz) ===================== */
+const STUDY={
+  [TOP.OST]:`
+  <h3>Osteologia do Crânio</h3>
+  <div class="small"><b>Neurocrânio (8):</b> frontal(1), parietais(2), temporais(2), occipital(1), esfenoide(1), etmoide(1). <b>Viscerocrânio (14):</b> maxilas(2), zigomáticos(2), nasais(2), lacrimais(2), palatinos(2), conchas inferiores(2), vômer(1), mandíbula(1).</div>
+  <div class="hr"></div>
+  <div class="small"><b>Forames alta frequência:</b> rotundo(V2), oval(V3), espinhoso(a. meníngea média), canal hipoglosso(XII), jugular(IX–XI), magno (bulbo/aa. vertebrais/raiz esp. XI). <b>Seios:</b> frontal, maxilar, etmoidais, esfenoidal. <b>Pontos:</b> nasion, bregma, lambda, pterion, asterion, inion.</div>
+  `,
+  [TOP.ART]:`
+  <h3>Artrologia</h3>
+  <div class="small"><b>Suturas</b> = fibrosas. <b>ATM</b> = sinovial modificada com disco; rotação (inferior) + translação (superior). <b>Atlanto-occipital</b>: condilar (“sim”). <b>Atlanto-axial</b>: trocóide (“não”) + laterais planas. Cervical: discos (sínfises), facetárias (sinoviais planas), uncovertebrais (C3–C7).</div>
+  `,
+  [TOP.MIO]:`
+  <h3>Miologia</h3>
+  <div class="small"><b>Mímica:</b> VII. <b>Mastigação:</b> V3. <b>Supra-hióideos:</b> digástrico (VA V3; VP VII), estilohióideo (VII), milohióideo (V3), geniohióideo (C1 via XII). <b>Infra-hióideos:</b> ansa (C1–C3) exceto tireo-hióideo (C1 via XII). <b>Língua:</b> XII exceto palatoglosso (X). <b>Faringe:</b> X via plexo; exceção: estilofaríngeo (IX). <b>Laringe:</b> cricotireóideo (laríngeo sup. ext.) e demais intrínsecos (recorrente).</div>
+  `,
+  [TOP.VAS]:`
+  <h3>Sistema Vascular</h3>
+  <div class="small"><b>ECA:</b> ramos (SALFOPMS). <b>ACI:</b> sem ramos cervicais. <b>Vertebral:</b> subclávia; entra tipicamente em C6. <b>JI:</b> continuação do seio sigmoide. <b>Plexo pterigoideo</b> comunica com seio cavernoso (vias emissárias).</div>
+  `,
+  [TOP.CAV]:`
+  <h3>Cavidades e Compartimentos</h3>
+  <div class="small"><b>Meato médio</b> (frontal/maxilar/etmoidais ant.), <b>meato inferior</b> (ducto nasolacrimal), <b>recesso esfenoetmoidal</b> (esfenoidal). <b>Espaços profundos:</b> parafaríngeo, retrofaríngeo/danger space etc.</div>
+  `,
+  [TOP.GLD]:`
+  <h3>Glândulas</h3>
+  <div class="small"><b>Parótida:</b> atravessada pelo VII; ducto abre oposto ao 2º molar sup. <b>Submandibular:</b> Wharton → carúncula sublingual. <b>Tireoide:</b> a. tireoidea sup. (ECA) e inf. (tronco tireocervical).</div>
+  `,
+  [TOP.SEN]:`
+  <h3>Órgãos dos Sentidos</h3>
+  <div class="small"><b>Língua:</b> filiforme sem botões gustativos; paladar ant.2/3 = VII, circunvaladas/post.1/3 = IX. <b>Ouvido médio:</b> ossículos.</div>
+  `,
+  [TOP.TOPG]:`
+  <h3>Anatomia Topográfica</h3>
+  <div class="small"><b>Fáscias cervicais:</b> investing, pré-traqueal, pré-vertebral; bainha carotídea. <b>Triângulos:</b> anterior e posterior. <b>Marcos:</b> cricoide ~C6; bifurcação carotídea ~C4.</div>
+  `,
+  [TOP.EXAM]:`
+  <h3>Questões de Prova (25)</h3>
+  <div class="small">Seleção “puro suco”: estruturas/forames, ATM, AO/AA, inervações exceção (língua/faringe/laringe), ECA/ACI, vertebral, jugulares, drenagens, marcos cervicais e parótida/tireoide.</div>
+  `
+};
+
+/* ===================== BANCO ===================== */
+const BANK = [
+  /* ---------- PROVA (25) ---------- */
+  q("ex01",TOP.EXAM,"O forame redondo (rotundum) transmite:",["Nervo maxilar (V2)","Nervo mandibular (V3)","Nervo oftálmico (V1)","Nervo facial (VII)"],0,rev("Forame redondo","Forame redondo: V2.")),
+  q("ex02",TOP.EXAM,"O forame oval transmite principalmente:",["Nervo mandibular (V3)","Nervo maxilar (V2)","Nervo hipoglosso (XII)","Artéria carótida interna"],0,rev("Forame oval","Forame oval: V3.")),
+  q("ex03",TOP.EXAM,"O forame espinhoso transmite principalmente:",["Artéria meníngea média","Artéria oftálmica","Artéria vertebral","Artéria basilar"],0,rev("Forame espinhoso","Artéria meníngea média passa no forame espinhoso.")),
+  q("ex04",TOP.EXAM,"O canal do hipoglosso transmite:",["Nervo hipoglosso (XII)","Nervo vago (X)","Nervo acessório (XI)","Nervo glossofaríngeo (IX)"],0,rev("Canal hipoglosso","Canal do hipoglosso: XII.")),
+  q("ex05",TOP.EXAM,"O forame jugular relaciona-se a:",["Nervos IX, X e XI","Nervos III, IV e VI","Nervos V2 e V3","Nervo XII"],0,rev("Forame jugular","Jugular: IX–XI (além de estruturas venosas).")),
+  q("ex06",TOP.EXAM,"O forame magno transmite (entre outros):",["Bulbo/medula, aa. vertebrais e raiz espinal do XI","V2 e a. meníngea média","VII e VIII","Apenas o XII"],0,rev("Forame magno","Conteúdo clássico: bulbo/medula, aa. vertebrais, raiz espinal do XI.")),
+  q("ex07",TOP.EXAM,"Na cavidade nasal, o ducto nasolacrimal drena no:",["Meato inferior","Meato médio","Meato superior","Recesso esfenoetmoidal"],0,rev("Meato inferior","Ducto nasolacrimal: meato inferior.")),
+  q("ex08",TOP.EXAM,"O seio esfenoidal drena no:",["Recesso esfenoetmoidal","Meato inferior","Meato médio","Coana direta"],0,rev("Drenagem esfenoidal","Esfenoidal → recesso esfenoetmoidal.")),
+  q("ex09",TOP.EXAM,"O seio maxilar drena tipicamente no:",["Meato médio","Meato inferior","Meato superior","Recesso esfenoetmoidal"],0,rev("Drenagem maxilar","Seio maxilar → meato médio (hiato/infundíbulo).")),
+  q("ex10",TOP.EXAM,"Pterion é clinicamente importante por:",["Relacionar-se com ramos da a. meníngea média","Relacionar-se com seio sagital superior","Ser ponto de entrada da ACI","Recobrir o canal do hipoglosso"],0,rev("Pterion","Trauma no pterion pode lesar a meníngea média (hematoma epidural).")),
+  q("ex11",TOP.EXAM,"A ATM é melhor descrita como:",["Sinovial modificada com disco articular","Fibrosa (sindesmose)","Cartilaginosa (sínfise)","Sincondrose hialina"],0,rev("ATM","ATM: sinovial modificada com disco.")),
+  q("ex12",TOP.EXAM,"Abertura ampla da boca na ATM envolve:",["Translação (superior) após rotação (inferior)","Só rotação no compartimento superior","Só rotação no superior e inferior","Movimento trocóide puro"],0,rev("ATM – mecânica","Rotação inicial no compartimento inferior; translação no superior.")),
+  q("ex13",TOP.EXAM,"Atlanto-occipital (AO) é:",["Sinovial condilar/elipsóide","Trocóide","Gínglimo","Sínfise"],0,rev("AO","AO: condilar/elipsóide (“sim”).")),
+  q("ex14",TOP.EXAM,"Atlanto-axial mediana (C1–C2) é:",["Sinovial trocóide","Condilar","Selar","Sincondrose"],0,rev("AA","AA mediana: trocóide (“não”).")),
+  q("ex15",TOP.EXAM,"Músculos da mastigação são inervados por:",["V3","VII","IX","XII"],0,rev("Mastigação","Mastigação: trigêmeo mandibular (V3).")),
+  q("ex16",TOP.EXAM,"Músculos da mímica são inervados por:",["VII","V3","X","XII"],0,rev("Mímica","Expressão facial: VII.")),
+  q("ex17",TOP.EXAM,"Inervação motora da língua é:",["XII exceto palatoglosso (X)","X exceto palatoglosso (XII)","V3 para todos","VII para todos"],0,rev("Língua – exceção","Motores: XII; exceção: palatoglosso (X).")),
+  q("ex18",TOP.EXAM,"Qual músculo da faringe é exceção (IX)?",["Estilofaríngeo","Constritor superior","Constritor médio","Constritor inferior"],0,rev("Exceção faríngea","Estilofaríngeo: IX; demais principais: X via plexo.")),
+  q("ex19",TOP.EXAM,"Qual músculo intrínseco da laringe é do laríngeo superior (ramo externo)?",["Cricotireóideo","Cricoaritenoideo posterior","Tireoaritenoideo","Aritenoideo transverso"],0,rev("Exceção laríngea","Cricotireóideo: laríngeo sup. ext.; outros: recorrente.")),
+  q("ex20",TOP.EXAM,"A maioria dos intrínsecos da laringe é inervada pelo:",["Laríngeo recorrente","Laríngeo superior (interno)","VII","XII"],0,rev("Laringe","Recorrente inerva quase todos os intrínsecos.")),
+  q("ex21",TOP.EXAM,"A carótida interna no pescoço:",["Não emite ramos cervicais","Emite ramos para face","Emite a meníngea média","Emite a temporal superficial"],0,rev("ACI","ACI: sem ramos cervicais.")),
+  q("ex22",TOP.EXAM,"Ramos terminais da carótida externa são:",["Temporal superficial e maxilar","Oftálmica e cerebral média","Basilar e vertebral","Meníngea média e facial"],0,rev("ECA terminais","ECA termina em temporal superficial + maxilar.")),
+  q("ex23",TOP.EXAM,"A artéria vertebral geralmente entra no forame transversário em:",["C6","C1","C3","T1"],0,rev("Vertebral","Entrada típica: C6.")),
+  q("ex24",TOP.EXAM,"A jugular interna é continuação do:",["Seio sigmoide","Seio cavernoso","Seio sagital superior","Plexo pterigoideo"],0,rev("JI","Seio sigmoide → jugular interna.")),
+  q("ex25",TOP.EXAM,"A parótida é atravessada por:",["Nervo facial (VII)","Nervo hipoglosso (XII)","Nervo glossofaríngeo (IX)","Nervo vago (X)"],0,rev("Parótida","VII atravessa a parótida.")),
+
+  /* ---------- 1) Osteologia ---------- */
+  q("ost01",TOP.OST,"O neurocrânio possui quantos ossos e quais são pares?",["8; pares: parietais e temporais","10; pares: frontais e parietais","8; pares: frontal e occipital","14; pares: temporais e zigomáticos"],0,rev("Neurocrânio","Neurocrânio = 8 ossos; pares: parietais(2) e temporais(2).")),
+  q("ost02",TOP.OST,"Qual osso é do viscerocrânio (face) e é ímpar?",["Vômer","Maxila","Nasal","Palatino"],0,rev("Viscerocrânio ímpar","Vômer e mandíbula são ímpares no viscerocrânio.")),
+  q("ost03",TOP.OST,"Pterion é ponto craniométrico importante por sobrepor:",["Ramos da a. meníngea média (risco hematoma epidural)","Seio sagital superior (risco trombose)","Bulbo olfatório (risco anosmia)","Seio cavernoso (risco fístula)"],0,rev("Clínica do pterion","Pterion recobre a artéria meníngea média (ramo), vulnerável a trauma.")),
+  q("ost04",TOP.OST,"O forame redondo (rotundum) transmite principalmente:",["Nervo maxilar (V2)","Nervo mandibular (V3)","Nervo oftálmico (V1)","Artéria carótida interna"],0,rev("Forame redondo","Forame redondo = V2.")),
+  q("ost05",TOP.OST,"O forame oval transmite principalmente:",["Nervo mandibular (V3)","Nervo maxilar (V2)","Nervo oftálmico (V1)","Nervo facial (VII)"],0,rev("Forame oval","Forame oval = V3.")),
+  q("ost06",TOP.OST,"O forame espinhoso transmite principalmente:",["Artéria meníngea média","Artéria vertebral","Veia facial","Artéria carótida interna"],0,rev("Forame espinhoso","Forame espinhoso: passa a artéria meníngea média.")),
+  q("ost07",TOP.OST,"O canal do hipoglosso transmite:",["Nervo hipoglosso (XII)","Nervo vago (X)","Nervo acessório (XI)","Nervo glossofaríngeo (IX)"],0,rev("Canal do hipoglosso","Canal do hipoglosso = XII.")),
+  q("ost08",TOP.OST,"O forame jugular está associado principalmente aos nervos:",["IX, X, XI","V1, V2, V3","III, IV, VI","VII, VIII"],0,rev("Forame jugular","Forame jugular: IX, X, XI (além de estruturas venosas).")),
+  q("ost09",TOP.OST,"O forame magno transmite (entre outros):",["Bulbo/medula, aa. vertebrais, raízes espinhais do XI","V2 e a. meníngea média","N. facial e n. vestibulococlear","N. hipoglosso exclusivamente"],0,rev("Forame magno","Bulbo/medula, aa. vertebrais e raízes espinhais do XI são clássicos.")),
+  q("ost10",TOP.OST,"Qual seio paranasal drena tipicamente no meato médio (via hiato semilunar)?",["Seio maxilar","Seio esfenoidal","Células etmoidais posteriores","Todos drenam no meato inferior"],0,rev("Drenagem","Seio maxilar drena no meato médio (assim como frontal e etmoidais anteriores).")),
+  q("ost11",TOP.OST,"O seio esfenoidal drena principalmente no:",["Recesso esfenoetmoidal","Meato inferior","Meato médio","Meato superior"],0,rev("Drenagem esfenoidal","Esfenoidal → recesso esfenoetmoidal.")),
+  q("ost12",TOP.OST,"A fossa craniana média é formada principalmente por:",["Esfenoide e temporal","Frontal e etmoide","Occipital e temporal","Parietal e frontal"],0,rev("Fossas","Fossa média: esfenoide + temporal.")),
+  q("ost13",TOP.OST,"Nasion é definido como:",["Junção frontonasal na linha média","Ponto mais posterior do occipital","Junção parieto-occipital","Junção temporo-zigomática"],0,rev("Craniometria","Nasion = junção frontonasal na linha média.")),
+  q("ost14",TOP.OST,"Bregma é a interseção de:",["Suturas coronal e sagital","Suturas lambdóidea e sagital","Suturas escamosa e coronal","Suturas metópica e escamosa"],0,rev("Craniometria","Bregma: coronal + sagital.")),
+  q("ost15",TOP.OST,"Lambda é a interseção de:",["Suturas lambdóidea e sagital","Suturas coronal e sagital","Suturas escamosa e sagital","Suturas metópica e coronal"],0,rev("Craniometria","Lambda: lambdóidea + sagital.")),
+  q("ost16",TOP.OST,"Forame mandibular relaciona-se a:",["Entrada do n. alveolar inferior no canal mandibular","Saída do n. mentual","Passagem do XII","Passagem do VII"],0,rev("Mandíbula","Forame mandibular: entrada do n. alveolar inferior (bloqueio).")),
+  q("ost17",TOP.OST,"Forame mentual está associado ao:",["Nervo mentual (ramo do alveolar inferior)","Nervo lingual","Nervo bucal","Nervo auriculotemporal"],0,rev("Mandíbula","Forame mentual: saída do nervo mentual.")),
+  q("ost18",TOP.OST,"Qual conjunto lista apenas seios paranasais?",["Frontal, maxilar, etmoidais, esfenoidal","Frontal, parietal, temporal, occipital","Esfenoide, etmoide, vômer, nasal","Maxilar, zigomático, lacrimal, palatino"],0,rev("Seios paranasais","Frontal, maxilar, etmoidais, esfenoidal.")),
+
+  /* ---------- 2) Artrologia ---------- */
+  q("art01",TOP.ART,"Suturas cranianas são articulações:",["Fibrosas","Cartilaginosas","Sinoviais","Mistas"],0,rev("Suturas","Suturas = fibrosas.")),
+  q("art02",TOP.ART,"A ATM é melhor descrita como:",["Sinovial modificada com disco articular","Fibrosa do tipo sindesmose","Cartilaginosa do tipo sínfise","Sincondrose hialina"],0,rev("ATM","Sinovial modificada com disco.")),
+  q("art03",TOP.ART,"Abertura ampla da boca na ATM envolve:",["Translação do côndilo + disco sobre a eminência articular","Apenas rotação no compartimento superior","Apenas rotação no superior e inferior","Movimento trocóide puro"],0,rev("ATM – biomecânica","Abertura ampla: rotação inicial + translação anterior.")),
+  q("art04",TOP.ART,"Atlanto-occipital é:",["Condilar/Elipsóide (sinovial)","Trocóide","Gínglimo","Selar"],0,rev("AO","Condilar/elipsóide (“sim”).")),
+  q("art05",TOP.ART,"Atlanto-axial mediana é principalmente:",["Trocóide (pivô)","Condilar","Selar","Sínfise"],0,rev("AA","Rotação (“não”): trocóide.")),
+  q("art06",TOP.ART,"Articulações uncovertebrais (Luschka) ocorrem em:",["C3–C7","C1–C2","C7–T1","T1–T4"],0,rev("Uncovertebrais","Clássico: C3–C7.")),
+  q("art07",TOP.ART,"Discos intervertebrais são:",["Sínfises (cartilaginosas secundárias)","Sincondroses","Sinoviais planas","Fibrosas"],0,rev("Disco","Disco = sínfise.")),
+  q("art08",TOP.ART,"Facetárias (zigoapofisárias) cervicais são:",["Sinoviais planas","Sínfises","Sincondroses","Gínglimos"],0,rev("Facetárias","Sinoviais planas.")),
+  q("art09",TOP.ART,"Ligamento lateral que estabiliza a ATM:",["Temporomandibular","Alar","Transverso do atlas","Amarelo"],0,rev("ATM – ligamentos","Temporomandibular (lateral) é chave.")),
+  q("art10",TOP.ART,"Rotação inicial da mandíbula ocorre no:",["Compartimento inferior (côndilo–disco)","Compartimento superior","Apenas no superior","Suturas"],0,rev("ATM – compartimentos","Rotação: inferior; translação: superior.")),
+  q("art11",TOP.ART,"Maior rotação do pescoço ocorre em:",["Atlanto-axial","Atlanto-occipital","C5–C6 disco","C7–T1 facetas"],0,rev("Rotação cervical","C1–C2 domina rotação.")),
+  q("art12",TOP.ART,"Disco articular da ATM é composto principalmente por:",["Fibrocartilagem","Cartilagem hialina","Osso","Gordura"],0,rev("Disco ATM","Disco = fibrocartilagem.")),
+  q("art13",TOP.ART,"Atlanto-axiais laterais (D/E) são mais:",["Sinoviais planas","Trocóides","Selas","Gínglimos"],0,rev("AA laterais","Laterais: planas; mediana: trocóide.")),
+  q("art14",TOP.ART,"Sutura denticulada é caracterizada por:",["Bordas interdigitadas/serrilhadas","Dente no alvéolo","Ligamento interósseo longo","Cartilagem hialina"],0,rev("Morfologia","Denticulada = interdigitação serrilhada.")),
+  q("art15",TOP.ART,"A ATM ocorre entre:",["Côndilo mandibular e porção escamosa do temporal","Coronóide e zigomático","Ramo mandibular e maxila","Mandíbula e esfenoide"],0,rev("Superfícies","Côndilo ↔ fossa/eminência do temporal.")),
+  q("art16",TOP.ART,"“Sim” (flexo-extensão) relaciona-se mais à:",["Atlanto-occipital","Atlanto-axial","Discos cervicais","ATM"],0,rev("Clássico","“Sim” = atlanto-occipital.")),
+  q("art17",TOP.ART,"“Não” (rotação) relaciona-se mais à:",["Atlanto-axial","Atlanto-occipital","ATM","Suturas"],0,rev("Clássico","“Não” = atlanto-axial.")),
+  q("art18",TOP.ART,"Função fisiológica principal das suturas:",["Permitir crescimento craniano e microdeformação","Ampla mobilidade articular","Rotação pivô","Flexão como dobradiça"],0,rev("Função","Suturas: crescimento e mínima mobilidade.")),
+
+  /* ---------- 3) Miologia ---------- */
+  q("mio01",TOP.MIO,"Inervação principal dos músculos da mímica:",["VII","V3","X","XII"],0,rev("Mímica","Expressão facial: VII.")),
+  q("mio02",TOP.MIO,"Inervação principal dos músculos da mastigação:",["V3","VII","XII","IX"],0,rev("Mastigação","Mastigação: V3.")),
+  q("mio03",TOP.MIO,"Qual suprahióideo é inervado por V3 (nervo do milohióideo)?",["Milohióideo","Estilohióideo","Ventre posterior do digástrico","Palatoglosso"],0,rev("Supra-hióideos","Milohióideo + ventre anterior do digástrico: V3.")),
+  q("mio04",TOP.MIO,"Ventre anterior do digástrico é inervado por:",["V3","VII","XII","IX"],0,rev("Digástrico","VA: V3; VP: VII.")),
+  q("mio05",TOP.MIO,"Ventre posterior do digástrico e estilohióideo:",["VII","V3","XII","X"],0,rev("Suprahióideos","Ambos: VII.")),
+  q("mio06",TOP.MIO,"Geniohióideo recebe fibras motoras de:",["C1 via XII","V3","VII","X"],0,rev("Geniohióideo","C1 via hipoglosso.")),
+  q("mio07",TOP.MIO,"Infrahióideos: exceção à ansa cervicalis:",["Tireo-hióideo","Esterno-hióideo","Omo-hióideo","Esterno-tireóideo"],0,rev("Infra","Tireo-hióideo: C1 via XII.")),
+  q("mio08",TOP.MIO,"Inervação motora da língua:",["XII exceto palatoglosso (X)","X exceto genioglosso","V3 para todos","VII para todos"],0,rev("Língua","Motores: XII; exceção: palatoglosso (X).")),
+  q("mio09",TOP.MIO,"Faringe (constritores): inervação principal:",["X via plexo faríngeo","IX","XII","V3"],0,rev("Faringe","Plexo faríngeo do X.")),
+  q("mio10",TOP.MIO,"Exceção faríngea (inervação por IX):",["Estilofaríngeo","Constritor superior","Constritor médio","Constritor inferior"],0,rev("Exceção","Estilofaríngeo = IX.")),
+  q("mio11",TOP.MIO,"Músculo laríngeo inervado pelo laríngeo superior (ramo externo):",["Cricotireóideo","Tireoaritenoideo","Cricoaritenoideo posterior","Aritenoideo transverso"],0,rev("Laringe","Cricotireóideo: laríngeo sup. ext.")),
+  q("mio12",TOP.MIO,"Demais intrínsecos da laringe são inervados por:",["Laríngeo recorrente","Laríngeo superior (interno)","XII","VII"],0,rev("Laringe","Recorrente inerva a maioria.")),
+  q("mio13",TOP.MIO,"ECM: inervação motora principal:",["XI","VII","X","XII"],0,rev("ECM/Trapézio","XI motor + C2–C4 propriocepção.")),
+  q("mio14",TOP.MIO,"Trapézio: inervação motora principal:",["XI","V3","VII","IX"],0,rev("Trapézio","XI motor.")),
+  q("mio15",TOP.MIO,"Escaleno anterior insere-se em:",["1ª costela","2ª costela","Processo mastoide","Manúbrio"],0,rev("Escalenos","Anterior → 1ª costela.")),
+  q("mio16",TOP.MIO,"Escaleno médio insere-se em:",["1ª costela","2ª costela","Clavícula","Escápula"],0,rev("Escalenos","Médio → 1ª costela.")),
+  q("mio17",TOP.MIO,"Escaleno posterior insere-se principalmente em:",["2ª costela","1ª costela","Manúbrio","Hióide"],0,rev("Escalenos","Posterior → 2ª costela.")),
+  q("mio18",TOP.MIO,"Músculos pré-vertebrais clássicos incluem:",["Longo do pescoço e longo da cabeça","Trapézio e ECM","Digástrico e milohióideo","Constritores faríngeos"],0,rev("Pré-vertebrais","Longus colli e longus capitis.")),
+
+  /* ---------- 4) Vascular ---------- */
+  q("vas01",TOP.VAS,"Bifurcação da carótida comum ocorre tipicamente em:",["C4 (aprox. cartilagem tireoide)","C1","C7","T2"],0,rev("Carótida","Referência comum: ~C4.")),
+  q("vas02",TOP.VAS,"Qual NÃO é ramo da carótida externa?",["Oftálmica","Facial","Lingual","Maxilar"],0,rev("ACI","Oftálmica é da carótida interna.")),
+  q("vas03",TOP.VAS,"A carótida interna no pescoço:",["Não emite ramos","Emite a facial","Emite a lingual","Emite a maxilar"],0,rev("ACI","Sem ramos cervicais.")),
+  q("vas04",TOP.VAS,"Mnemônico clássico dos ramos da carótida externa:",["SALFOPMS","MABCDXYZ","VITAMINA","CAROTIDA"],0,rev("Ramos ECA","Sup. tireoidea, Asc. faríngea, Lingual, Facial, Occipital, Post. auricular, Maxilar, Temporal superficial.")),
+  q("vas05",TOP.VAS,"Artéria vertebral origina-se de:",["Subclávia","Carótida comum","Carótida externa","Basilar"],0,rev("Vertebral","Vertebral nasce da subclávia.")),
+  q("vas06",TOP.VAS,"Vertebral entra tipicamente no forame transversário em:",["C6","C1","C3","T1"],0,rev("Vertebral","Entrada mais comum: C6.")),
+  q("vas07",TOP.VAS,"Jugular interna é continuidade do:",["Seio sigmoide","Seio cavernoso","Seio sagital superior","Plexo pterigoideo"],0,rev("JI","Seio sigmoide → jugular interna.")),
+  q("vas08",TOP.VAS,"Jugular externa drena principalmente:",["Couro cabeludo/face superficial","Seios profundos diretamente","Cavidade nasal","Veia porta"],0,rev("JE","Mais superficial.")),
+  q("vas09",TOP.VAS,"Plexo pterigoideo comunica-se clinicamente com:",["Seio cavernoso (vias emissárias)","Veia femoral","Veia porta","VCI direta"],0,rev("Plexo","Rota potencial para seio cavernoso.")),
+  q("vas11",TOP.VAS,"Forame espinhoso e vascularização dural: artéria associada é:",["Meníngea média (ramo da maxilar)","Facial","Occipital","Lingual"],0,rev("Meníngea média","Ramo da maxilar (ECA).")),
+  q("vas12",TOP.VAS,"Ramos terminais da carótida externa:",["Temporal superficial e maxilar","Oftálmica e cerebral média","Basilar e vertebral","Meníngea média e facial"],0,rev("Terminais ECA","Temporal superficial + maxilar.")),
+  q("vas13",TOP.VAS,"A carótida interna entra no crânio pelo:",["Canal carotídeo","Forame oval","Forame espinhoso","Canal do hipoglosso"],0,rev("Canal carotídeo","ACI percorre canal carotídeo.")),
+  q("vas14",TOP.VAS,"Veia facial tem comunicação clínica importante com:",["Oftálmica/seio cavernoso (ângulo facial)","Veia porta","Ázigos","Veias pulmonares"],0,rev("Triângulo perigoso","Risco por comunicações venosas faciais.")),
+  q("vas15",TOP.VAS,"Sistema vertebrobasilar é formado por:",["Vertebrais que formam a basilar","Carótidas externas que se unem","Jugulares internas que se unem","Carótidas internas que se unem"],0,rev("Vertebrobasilar","Duas vertebrais → basilar.")),
+  q("vas16",TOP.VAS,"Conteúdo clássico da bainha carotídea:",["Carótida, jugular interna, vago","Vertebral, frênico, subclávia","Facial, lingual, hipoglosso","VII e ducto parotídeo"],0,rev("Bainha","Carótida + IJV + X.")),
+  q("vas17",TOP.VAS,"Artéria tireoidea superior origina-se geralmente da:",["Carótida externa","Carótida interna","Subclávia","Vertebral"],0,rev("Tireoidea sup.","ECA.")),
+  q("vas18",TOP.VAS,"Artéria tireoidea inferior origina-se do:",["Tronco tireocervical (subclávia)","Carótida externa","Carótida interna","Temporal superficial"],0,rev("Tireoidea inf.","Tronco tireocervical.")),
+
+  /* ---------- 5) Cavidades ---------- */
+  q("cav01",TOP.CAV,"Seio maxilar drena tipicamente no:",["Meato médio","Meato inferior","Meato superior","Recesso esfenoetmoidal"],0,rev("Drenagem nasal","Seio maxilar → meato médio.")),
+  q("cav02",TOP.CAV,"Seio esfenoidal drena no:",["Recesso esfenoetmoidal","Meato inferior","Meato médio","Coana direta"],0,rev("Drenagem nasal","Esfenoidal → recesso esfenoetmoidal.")),
+  q("cav03",TOP.CAV,"A faringe divide-se em:",["Naso-, oro- e laringofaringe","Orbito-, naso- e bucofaringe","Laringo- e traqueofaringe","Naso- e esofagofaringe"],0,rev("Faringe","Três partes.")),
+  q("cav04",TOP.CAV,"Cartilagem completa em anel na via aérea:",["Cricoide","Tireoide","Epiglote","Aritenoide"],0,rev("Laringe","Cricoide é anel completo.")),
+  q("cav05",TOP.CAV,"O espaço retrofaríngeo é relevante porque:",["Infecção pode propagar ao mediastino","É sede de hematoma epidural","Transmitir V2","Conter disco da ATM"],0,rev("Espaços profundos","Pode descer ao mediastino (danger space).")),
+  q("cav06",TOP.CAV,"Meato inferior recebe a abertura do:",["Ducto nasolacrimal","Seio maxilar","Seio esfenoidal","Etmoidais posteriores"],0,rev("Nasal","Ducto nasolacrimal → meato inferior.")),
+  q("cav07",TOP.CAV,"Meato superior recebe drenagem principalmente de:",["Células etmoidais posteriores","Seio maxilar","Seio frontal","Ducto nasolacrimal"],0,rev("Etmoidais","Posteriores → meato superior.")),
+  q("cav08",TOP.CAV,"O recesso esfenoetmoidal localiza-se:",["Superior e posterior à concha superior","Abaixo da concha inferior","Entre concha média e inferior","Dentro da órbita"],0,rev("Recesso","Acima da concha superior.")),
+  q("cav09",TOP.CAV,"Cavidade oral: correto afirmar:",["Divide-se em vestíbulo e cavidade oral própria","É sinônimo de orofaringe","Não possui assoalho muscular","Comunica-se direto com laringe"],0,rev("Oral","Vestíbulo + cavidade oral própria.")),
+
+  /* ---------- 6) Glândulas ---------- */
+  q("gld01",TOP.GLD,"A parótida é atravessada por:",["VII","XII","Frênico","III"],0,rev("Parótida","VII atravessa a parótida.")),
+  q("gld02",TOP.GLD,"Ducto parotídeo (Stensen) abre-se:",["Oposto ao 2º molar superior","Na carúncula sublingual","No meato inferior","No recesso esfenoetmoidal"],0,rev("Parótida","Papila parotídea: 2º molar superior.")),
+  q("gld03",TOP.GLD,"Ducto submandibular (Wharton) abre-se:",["Na carúncula sublingual","Oposto ao 2º molar superior","No meato médio","Na coana"],0,rev("Submandibular","Carúncula sublingual.")),
+  q("gld04",TOP.GLD,"Artéria tireoidea superior origina-se de:",["Carótida externa","Carótida interna","Vertebral","Basilar"],0,rev("Tireoide","Sup.: ECA.")),
+  q("gld05",TOP.GLD,"Artéria tireoidea inferior origina-se de:",["Tronco tireocervical (subclávia)","Carótida externa","Carótida interna","Temporal superficial"],0,rev("Tireoide","Inf.: tronco tireocervical.")),
+  q("gld06",TOP.GLD,"Lesão do laríngeo recorrente em tireoidectomia causa:",["Disfonia (paralisia de pregas vocais)","Paralisia mastigatória","Cegueira","Anosmia"],0,rev("Clínica","Recorrente inerva a maioria dos intrínsecos da laringe.")),
+
+  /* ---------- 7) Sentidos ---------- */
+  q("sen01",TOP.SEN,"Papila NÃO gustativa:",["Filiforme","Fungiforme","Circunvalada","Folhada"],0,rev("Papilas","Filiforme: mecânica.")),
+  q("sen02",TOP.SEN,"Paladar ant. 2/3 (exceto circunvaladas):",["VII (corda do tímpano)","IX","X","V3"],0,rev("Paladar","Gosto ant.2/3: VII.")),
+  q("sen03",TOP.SEN,"Paladar das circunvaladas:",["IX","VII","X","V1"],0,rev("Circunvaladas","IX.")),
+  q("sen04",TOP.SEN,"Ossículos do ouvido médio:",["Martelo, bigorna, estribo","Martelo, estribo, escafoide","Bigorna, estribo, cóclea","Tímpano, martelo, cóclea"],0,rev("Ossículos","Martelo, bigorna, estribo.")),
+
+  /* ---------- 8) Topográfica ---------- */
+  q("top01",TOP.TOPG,"Bainha carotídea contém tipicamente:",["Carótida, jugular interna e nervo vago","Vertebral, frênico e subclávia","Facial, lingual e hipoglosso","VII e ducto parotídeo"],0,rev("Bainha carotídea","Carótida + IJV + X.")),
+  q("top02",TOP.TOPG,"Cricoide situa-se aproximadamente em:",["C6","C2","T2","C1"],0,rev("Marco","Cricoide ~C6.")),
+  q("top03",TOP.TOPG,"Bifurcação carotídea é marco próximo a:",["C4","C7","T1","C1"],0,rev("Marco","Bifurcação ~C4.")),
+  q("top04",TOP.TOPG,"Triângulo posterior é delimitado por:",["ECM (borda posterior), trapézio, clavícula","Linha média, mandíbula, ECM","Mandíbula, temporal, zigomático","Hióide, tireoide, traqueia"],0,rev("Triângulo posterior","ECM post. + trapézio + clavícula.")),
+  q("top05",TOP.TOPG,"Triângulo posterior é subdividido pelo:",["Ventre inferior do omo-hióideo","Ventre anterior do digástrico","Milohióideo","Escaleno anterior"],0,rev("Subdivisão","Omo-hióideo → occipital e omoclavicular.")),
+  q("top06",TOP.TOPG,"Acesso cirúrgico cervical seguro depende de:",["Seguir planos fasciais e proteger bainha carotídea/nervos","Acessar via mucosa oral","Acessar via órbita","Traumar pterion"],0,rev("Cirurgia","Planos e identificação de estruturas nobres."))
+];
+
+// expõe para console
+window.BANK=BANK; window.TOP=TOP;
+
+/* ===================== PÁGINAS ===================== */
+const PAGES=[
+ {id:"home",t:"Início",d:"Dashboard + acesso a Quiz/Flashcards/Estudo/Config."},
+
+ {id:"quiz_prova",t:"Questões de Prova (25)",d:"As 25 mais prováveis de cair. Puro suco. Rodada fixa em 25."},
+
+ {id:"quiz_ost",t:"Quiz — Osteologia",d:"Neuro×viscero, ossos, fossas, base/forames, seios, mandíbula, pontos."},
+ {id:"quiz_art",t:"Quiz — Artrologia",d:"Suturas, ATM, atlanto-occipital/axial e coluna cervical."},
+ {id:"quiz_mio",t:"Quiz — Miologia",d:"Mímica, mastigação, supra/infra, língua, faringe, laringe, ECM, trapézio, escalenos, pré-vertebrais."},
+ {id:"quiz_vas",t:"Quiz — Vascular",d:"Carótidas, vertebral, jugulares, face e plexos."},
+ {id:"quiz_cav",t:"Quiz — Cavidades",d:"Nasal/seios, oral, faringe, laringe, órbita e espaços cervicais profundos."},
+ {id:"quiz_gld",t:"Quiz — Glândulas",d:"Parótida, submandibular, sublingual, tireoide, paratireoides."},
+ {id:"quiz_sen",t:"Quiz — Sentidos",d:"Olho, ouvido externo/médio, língua (estrutura/papilas)." },
+ {id:"quiz_topg",t:"Quiz — Topográfica",d:"Fáscias, planos, triângulos, marcos e acesso cirúrgico cervical."},
+
+ {id:"flash",t:"Flashcards (erros)",d:"Leitner simples, offline (com filtro por tema)."},
+ {id:"estudo",t:"Estudo",d:"Mapas rápidos por tema (sem imagens)."},
+ {id:"cfg",t:"Configurações",d:"Modo prova/treino, rodada e aleatorização."},
+];
+
+function go(id){S.page=id;save();render();}
+function renderNav(){
+  const nav=$("#nav"); nav.innerHTML="";
+  const order=["home","quiz_prova","quiz_ost","quiz_art","quiz_mio","quiz_vas","quiz_cav","quiz_gld","quiz_sen","quiz_topg","flash","estudo","cfg"];
+  order.forEach(id=>{
+    const p=PAGES.find(x=>x.id===id);
+    const b=document.createElement("button");
+    b.className=(S.page===id)?"active":"";
+    b.innerHTML=`<div style="font-weight:950">${p.t}</div><div class="small">${p.d}</div>`;
+    b.onclick=()=>go(id);
+    nav.appendChild(b);
+  });
+}
+function renderKPIs(){
+  $("#kPts").textContent=S.pts;
+  $("#kAcc").textContent=pct(S.c,S.c+S.w)+"%";
+  $("#kStreak").textContent=S.streak;
+  $("#kAns").textContent=S.ans;
+}
+function setHeader(id){
+  const p=PAGES.find(x=>x.id===id);
+  $("#title").textContent=p.t;
+  $("#desc").textContent=p.d;
+  $("#pill").textContent =
+    id.startsWith("quiz_") ? ("QUIZ • "+S.settings.mode.toUpperCase()) :
+    id==="flash" ? "FLASHCARDS" :
+    id==="estudo" ? "ESTUDO" : "—";
+}
+
+/* ===================== QUIZ/FLASH ===================== */
+function byTopic(topic){return BANK.filter(x=>x.topic===topic);}
+function getQ(id){return BANK.find(x=>x.id===id);}
+function quizPageTopic(pid){
+  if(pid==="quiz_prova") return TOP.EXAM;
+  if(pid==="quiz_ost") return TOP.OST;
+  if(pid==="quiz_art") return TOP.ART;
+  if(pid==="quiz_mio") return TOP.MIO;
+  if(pid==="quiz_vas") return TOP.VAS;
+  if(pid==="quiz_cav") return TOP.CAV;
+  if(pid==="quiz_gld") return TOP.GLD;
+  if(pid==="quiz_sen") return TOP.SEN;
+  if(pid==="quiz_topg") return TOP.TOPG;
+  return null;
+}
+function startQuiz(topic){
+  const bank=byTopic(topic);
+  const n = (topic===TOP.EXAM) ? 25 : S.settings.round;
+  if(bank.length<n){toast("Banco insuficiente para este tema.");return;}
+  const pick=(S.settings.shuffle?shuffle(bank):bank).slice(0,n).map(x=>x.id);
+
+  // ✅ "order" guarda embaralhamento por questão
+  S.quiz={topic, ids:pick, i:0, mode:S.settings.mode, answers:{}, excluded:{}, order:{}};
+  save();
+}
+function addFlash(qid){
+  if(S.flash[qid]){S.flash[qid].due=Math.min(S.flash[qid].due, now()); S.flash[qid].box=Math.min(S.flash[qid].box,2); return;}
+  S.flash[qid]={box:1,due:now(),added:now()};
+}
+function points(ok){ return ok? (10+Math.min(S.streak,4)) : -3; }
+
+/* ===================== RENDER PAGES ===================== */
+function renderHome(){
+  const due=Object.values(S.flash).filter(c=>c.due<=now()).length;
+  $("#content").innerHTML=`
+    <h3>Início (dashboard)</h3>
+    <div class="small">Sem “cola” no quiz. Errou → revisão + flashcard automático.</div>
+    <div class="hr"></div>
+
+    <div class="row">
+      <button class="btn good" id="bp">Questões de Prova (25)</button>
+      <button class="btn good" id="b1">Quiz — Osteologia</button>
+      <button class="btn good" id="b2">Quiz — Artrologia</button>
+      <button class="btn good" id="b3">Quiz — Miologia</button>
+    </div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn good" id="b4">Quiz — Vascular</button>
+      <button class="btn good" id="b5">Quiz — Cavidades</button>
+      <button class="btn good" id="b6">Quiz — Glândulas</button>
+      <button class="btn good" id="b7">Quiz — Sentidos</button>
+      <button class="btn good" id="b8">Quiz — Topográfica</button>
+    </div>
+
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn" id="bf">Flashcards (erros)</button>
+      <button class="btn" id="bs">Estudo</button>
+      <button class="btn" id="bc">Configurações</button>
+    </div>
+  `;
+  $("#work").innerHTML=`
+    <h3>Status</h3>
+    <div class="small">Flashcards vencidos: <b>${due}</b> • Total flashcards: <b>${Object.keys(S.flash).length}</b></div>
+    <div class="hr"></div>
+    <div class="small"><b>Embaralhamento:</b> alternativas são embaralhadas e a ordem fica fixa por questão durante a resposta.</div>
+  `;
+  $("#bp").onclick=()=>go("quiz_prova");
+  $("#b1").onclick=()=>go("quiz_ost");
+  $("#b2").onclick=()=>go("quiz_art");
+  $("#b3").onclick=()=>go("quiz_mio");
+  $("#b4").onclick=()=>go("quiz_vas");
+  $("#b5").onclick=()=>go("quiz_cav");
+  $("#b6").onclick=()=>go("quiz_gld");
+  $("#b7").onclick=()=>go("quiz_sen");
+  $("#b8").onclick=()=>go("quiz_topg");
+  $("#bf").onclick=()=>go("flash");
+  $("#bs").onclick=()=>go("estudo");
+  $("#bc").onclick=()=>go("cfg");
+}
+
+function renderStudy(){
+  $("#content").innerHTML=`
+    <h3>Estudo</h3>
+    <div class="small">Mapas rápidos por tema (sem imagens). Use antes do quiz.</div>
+    <div class="hr"></div>
+    <div class="row">
+      <button class="btn" id="s0">${LABEL[TOP.EXAM]}</button>
+      <button class="btn" id="s1">${LABEL[TOP.OST]}</button>
+      <button class="btn" id="s2">${LABEL[TOP.ART]}</button>
+      <button class="btn" id="s3">${LABEL[TOP.MIO]}</button>
+      <button class="btn" id="s4">${LABEL[TOP.VAS]}</button>
+      <button class="btn" id="s5">${LABEL[TOP.CAV]}</button>
+      <button class="btn" id="s6">${LABEL[TOP.GLD]}</button>
+      <button class="btn" id="s7">${LABEL[TOP.SEN]}</button>
+      <button class="btn" id="s8">${LABEL[TOP.TOPG]}</button>
+    </div>
+    <div class="q" id="sBody" style="margin-top:10px">${STUDY[TOP.EXAM]}</div>
+  `;
+  $("#work").innerHTML=`<h3>Dica</h3><div class="small">No quiz: use ✕ para excluir quantas alternativas quiser e reativar quando quiser.</div>`;
+  $("#s0").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.EXAM];
+  $("#s1").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.OST];
+  $("#s2").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.ART];
+  $("#s3").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.MIO];
+  $("#s4").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.VAS];
+  $("#s5").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.CAV];
+  $("#s6").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.GLD];
+  $("#s7").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.SEN];
+  $("#s8").onclick=()=>$("#sBody").innerHTML=STUDY[TOP.TOPG];
+}
+
+function renderQuiz(pageId){
+  const topic=quizPageTopic(pageId);
+  const bank=byTopic(topic);
+  const need = (topic===TOP.EXAM) ? 25 : S.settings.round;
+
+  $("#content").innerHTML=`
+    <h3>${LABEL[topic]}</h3>
+    <div class="small">Rodada: <b>${need}</b> • Banco: <b>${bank.length}</b> • Modo: <b>${S.settings.mode.toUpperCase()}</b></div>
+    <div class="hr"></div>
+    <div class="row">
+      <button class="btn good" id="qStart">Iniciar / Reiniciar</button>
+      <button class="btn" id="qCfg">Configurações</button>
+      <button class="btn" id="qStudy">Estudo</button>
+    </div>
+  `;
+  $("#qCfg").onclick=()=>go("cfg");
+  $("#qStudy").onclick=()=>go("estudo");
+
+  if(!S.quiz || S.quiz.topic!==topic){
+    $("#work").innerHTML=`<h3>Pronto?</h3><div class="small">Clique em <b>Iniciar</b> para gerar uma rodada aleatória.</div>`;
+    $("#qStart").onclick=()=>{ startQuiz(topic); render(); };
+    return;
+  }
+
+  $("#qStart").onclick=()=>{ if(confirm("Reiniciar rodada?")){ startQuiz(topic); render(); } };
+
+  const quiz=S.quiz;
+
+  if(quiz.i>=quiz.ids.length){
+    let done=0, ok=0, er=0;
+    quiz.ids.forEach(id=>{
+      const a=quiz.answers[id];
+      if(a===undefined) return;
+      done++;
+      const Q=getQ(id);
+      if(a===Q.ans) ok++; else er++;
+    });
+    $("#work").innerHTML=`
+      <h3>Quiz finalizado</h3>
+      <div class="small">Feitas: <b>${done}/${quiz.ids.length}</b> • Acertos: <b>${ok}</b> • Erros: <b>${er}</b></div>
+      <div class="hr"></div>
+      <div class="row">
+        <button class="btn good" id="qNew">Nova rodada</button>
+        <button class="btn" id="qFlash">Flashcards</button>
+      </div>
+    `;
+    $("#qNew").onclick=()=>{ startQuiz(topic); render(); };
+    $("#qFlash").onclick=()=>go("flash");
+    return;
+  }
+
+  const qid=quiz.ids[quiz.i];
+  const Q=getQ(qid);
+  const excluded=new Set(quiz.excluded[qid]||[]);
+  const answered=(quiz.answers[qid]!==undefined);
+  const selected=quiz.answers[qid];
+
+  // ✅ Embaralhamento das opções (ordem fixa por questão durante a rodada)
+  function renderQuestion(showCorrection=false){
+
+    if(!quiz.order) quiz.order = {};
+    if(!quiz.order[qid]){
+      const idxs = Q.opts.map((_,i)=>i);
+      quiz.order[qid] = (S.settings.shuffle ? shuffle(idxs) : idxs);
+      save();
+    }
+    const order = quiz.order[qid];
+    const correctPos = order.indexOf(Q.ans);
+
+    const opts = order.map((origIdx,pos)=>{
+      const txt = Q.opts[origIdx];
+      const ex = excluded.has(origIdx);
+      const rowCls = ex ? "optRow excluded" : "optRow";
+
+      const corr = showCorrection && pos===correctPos;
+      const wrong = showCorrection && selected===origIdx && selected!==Q.ans;
+
+      return `
+        <div class="${rowCls}">
+          <button class="opt ${corr?"correct":""} ${wrong?"wrong":""}"
+                  data-opt="${origIdx}"
+                  ${answered && S.settings.mode==="treino" ? "disabled":""}>
+            <b>${pos+1}.</b> ${txt}
+          </button>
+          <button class="x"
+                  data-x="${origIdx}"
+                  aria-pressed="${ex?"true":"false"}"
+                  title="Excluir/reativar">✕</button>
+        </div>
+      `;
+    }).join("");
+
+    $("#work").innerHTML=`
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">Questão ${quiz.i+1}/${quiz.ids.length}</h3>
+        <span class="pill">${qid}</span>
+      </div>
+      <div class="q">
+        <div class="stem">${Q.stem}</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn warn" id="clrX">Limpar exclusões</button>
+          <button class="btn" id="skip">Pular</button>
+        </div>
+        <div class="opts">${opts}</div>
+        <div id="fb" class="small" style="margin-top:10px;display:none"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="prev" ${quiz.i===0?"disabled":""}>Voltar</button>
+        <button class="btn good" id="next">Próxima</button>
+        <button class="btn bad" id="end">Encerrar</button>
+      </div>
+    `;
+
+    document.querySelectorAll("[data-x]").forEach(b=>{
+      b.onclick=()=>{
+        const i=+b.getAttribute("data-x");
+        if(excluded.has(i)) excluded.delete(i); else excluded.add(i);
+        quiz.excluded[qid]=[...excluded];
+        save();
+        renderQuestion(showCorrection);
+      };
+    });
+
+    $("#clrX").onclick=()=>{ quiz.excluded[qid]=[]; save(); renderQuestion(showCorrection); };
+
+    document.querySelectorAll("[data-opt]").forEach(b=>{
+      b.onclick=()=>{
+        const i=+b.getAttribute("data-opt");
+        if(excluded.has(i)){ toast("Alternativa excluída. Reative no ✕ para marcar."); return; }
+
+        quiz.answers[qid]=i;
+        S.ans++;
+
+        const ok=(i===Q.ans);
+        if(ok){S.c++; S.streak++; S.pts+=points(true);}
+        else {S.w++; S.streak=0; S.pts+=points(false); addFlash(qid);}
+
+        S.perf[qid]=S.perf[qid]||{seen:0,wrong:0};
+        S.perf[qid].seen++;
+        if(!ok) S.perf[qid].wrong++;
+
+        save(); renderKPIs();
+
+        const fb=$("#fb");
+        if(S.settings.mode==="prova"){
+          fb.style.display="block";
+          fb.textContent="Resposta registrada (Modo PROVA). Correção só no final.";
+          return;
+        }
+
+        renderQuestion(true);
+
+        const fb2=$("#fb");
+        fb2.style.display="block";
+        if(ok){
+          fb2.innerHTML=`<b style="color:var(--g)">✅ Correto</b> • Correta: <b>${Q.opts[Q.ans]}</b>`;
+        }else{
+          fb2.innerHTML=`<b style="color:var(--r)">❌ Errado</b> • Correta: <b>${Q.opts[Q.ans]}</b>
+          <div class="hr"></div><b>${Q.review.t}:</b> ${Q.review.b}
+          <div class="hr"></div><span class="pill">Adicionado aos Flashcards</span>`;
+        }
+      };
+    });
+
+    $("#skip").onclick=()=>{ quiz.i++; save(); render(); };
+    $("#next").onclick=()=>{ quiz.i++; save(); render(); };
+    $("#prev").onclick=()=>{ quiz.i=Math.max(0,quiz.i-1); save(); render(); };
+    $("#end").onclick=()=>{ if(confirm("Encerrar?")){ quiz.i=quiz.ids.length; save(); render(); } };
+  }
+
+  renderQuestion(S.settings.mode==="treino" && answered);
+}
+
+function renderFlash(){
+  const cards=Object.entries(S.flash).map(([qid,c])=>({qid,...c}));
+  $("#content").innerHTML=`
+    <h3>Flashcards (Erros)</h3>
+    <div class="small">Leitner simples. Filtro por tema para revisar só um bloco.</div>
+    <div class="hr"></div>
+    <div class="row">
+      <div style="flex:1;min-width:240px">
+        <label>Filtro por tema</label>
+        <select id="fTopic">
+          <option value="all">Todos</option>
+          ${Object.values(TOP).map(t=>`<option value="${t}">${LABEL[t]}</option>`).join("")}
+        </select>
+      </div>
+      <div style="flex:1;min-width:240px">
+        <label>Ordenar</label>
+        <select id="fSort">
+          <option value="due">Vencidos primeiro</option>
+          <option value="box">Box menor primeiro</option>
+          <option value="recent">Mais recentes</option>
+        </select>
+      </div>
+    </div>
+    <div style="height:10px"></div>
+    <div class="small">Total: <b>${cards.length}</b> • Vencidos: <b>${cards.filter(x=>x.due<=now()).length}</b></div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <button class="btn good" id="fOpen">Abrir</button>
+      <button class="btn bad" id="fClear">Limpar flashcards</button>
+    </div>
+  `;
+
+  const getFiltered=()=>{
+    const t=$("#fTopic")?.value ?? "all";
+    const sort=$("#fSort")?.value ?? "due";
+    let arr=Object.entries(S.flash).map(([qid,c])=>({qid,...c})).filter(x=>{
+      const Q=getQ(x.qid); if(!Q) return false;
+      return t==="all" ? true : Q.topic===t;
+    });
+    if(sort==="due") arr.sort((a,b)=>(a.due-b.due)||(a.box-b.box));
+    if(sort==="box") arr.sort((a,b)=>(a.box-b.box)||(a.due-b.due));
+    if(sort==="recent") arr.sort((a,b)=>(b.added-a.added));
+    return arr;
+  };
+
+  function showCard(){
+    const arr=getFiltered();
+    const c=arr[0];
+    if(!c){ $("#work").innerHTML=`<h3>Nenhum flashcard no filtro</h3><div class="small">Erre no quiz para gerar flashcards.</div>`; return; }
+    const Q=getQ(c.qid);
+    if(!Q){ delete S.flash[c.qid]; save(); return render(); }
+
+    const venc = c.due<=now() ? "Vencido" : ("Vence em ~"+Math.ceil((c.due-now())/86400000)+"d");
+    $("#work").innerHTML=`
+      <h3>Card</h3>
+      <div class="small">Tema: <b>${LABEL[Q.topic]}</b> • Box: <b>${c.box}</b> • ${venc}</div>
+      <div class="q">
+        <div class="stem">${Q.stem}</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="show">Mostrar resposta</button>
+          <button class="btn good" id="ok">Eu acertei agora</button>
+          <button class="btn bad" id="no">Eu ainda erro</button>
+          <button class="btn" id="rm">Marcar como aprendido</button>
+        </div>
+        <div id="ans" style="display:none;margin-top:10px" class="small">
+          <div><b>Correta:</b> ${Q.opts[Q.ans]}</div>
+          <div class="hr"></div>
+          <b>${Q.review.t}:</b> ${Q.review.b}
+        </div>
+      </div>
+    `;
+
+    $("#show").onclick=()=>$("#ans").style.display="block";
+    $("#ok").onclick=()=>{
+      c.box=Math.min(5,c.box+1);
+      c.due=now()+([0,1,3,7,14,30][c.box]??30)*86400000;
+      S.flash[c.qid]=c;
+      S.pts+=6; S.c++; S.streak++; save(); renderKPIs(); showCard();
+    };
+    $("#no").onclick=()=>{
+      c.box=1; c.due=now();
+      S.flash[c.qid]=c;
+      S.pts-=2; S.w++; S.streak=0; save(); renderKPIs(); showCard();
+    };
+    $("#rm").onclick=()=>{ delete S.flash[c.qid]; save(); render(); };
+  }
+
+  $("#fOpen").onclick=()=>showCard();
+  $("#fClear").onclick=()=>{ if(confirm("Limpar todos os flashcards?")){S.flash={};save();render();} };
+  $("#fTopic").onchange=()=>showCard();
+  $("#fSort").onchange=()=>showCard();
+  showCard();
+}
+
+function renderCfg(){
+  $("#content").innerHTML=`
+    <h3>Configurações</h3>
+    <div class="small">Trocar modo/rodada: descarte o quiz ativo para aplicar imediatamente.</div>
+    <div class="hr"></div>
+    <div class="row">
+      <div style="flex:1;min-width:220px">
+        <label>Modo</label>
+        <select id="mode">
+          <option value="treino">Treino (feedback imediato)</option>
+          <option value="prova">Prova (correção ao final)</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <label>Rodada (exceto Questões de Prova)</label>
+        <select id="round">
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+        </select>
+      </div>
+    </div>
+    <div style="height:10px"></div>
+    <div class="row">
+      <div style="flex:1;min-width:220px">
+        <label>Aleatorização</label>
+        <select id="shuf">
+          <option value="on">ON</option>
+          <option value="off">OFF</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <label>Quiz ativo</label>
+        <button class="btn warn" id="dq">Descartar quiz ativo</button>
+      </div>
+    </div>
+  `;
+  $("#work").innerHTML=`
+    <h3>Banco (contagem)</h3>
+    <div class="small">
+      Prova (25): <b>${byTopic(TOP.EXAM).length}</b><br>
+      Osteologia: <b>${byTopic(TOP.OST).length}</b> • Artrologia: <b>${byTopic(TOP.ART).length}</b> • Miologia: <b>${byTopic(TOP.MIO).length}</b><br>
+      Vascular: <b>${byTopic(TOP.VAS).length}</b> • Cavidades: <b>${byTopic(TOP.CAV).length}</b> • Glândulas: <b>${byTopic(TOP.GLD).length}</b><br>
+      Sentidos: <b>${byTopic(TOP.SEN).length}</b> • Topográfica: <b>${byTopic(TOP.TOPG).length}</b>
+    </div>
+    <div class="hr"></div>
+    <div class="small">Tudo offline. Progresso em localStorage (Exportar/Importar).</div>
+  `;
+  $("#mode").value=S.settings.mode;
+  $("#round").value=String(S.settings.round);
+  $("#shuf").value=S.settings.shuffle?"on":"off";
+  $("#mode").onchange=e=>{S.settings.mode=e.target.value; save(); render();};
+  $("#round").onchange=e=>{S.settings.round=+e.target.value; save(); render();};
+  $("#shuf").onchange=e=>{S.settings.shuffle=(e.target.value==="on"); S.quiz=null; save(); render();};
+  $("#dq").onclick=()=>{S.quiz=null;save();toast("Quiz descartado.");render();};
+}
+
+function render(){
+  renderNav(); renderKPIs(); setHeader(S.page);
+  if(S.page==="home") return renderHome();
+  if(S.page==="estudo") return renderStudy();
+  if(S.page==="flash") return renderFlash();
+  if(S.page==="cfg") return renderCfg();
+  if(S.page.startsWith("quiz_")) return renderQuiz(S.page);
+}
+
+/* ===================== EXPORT/IMPORT/RESET ===================== */
+$("#exp").onclick=()=>{
+  const pack={at:new Date().toISOString(),state:S};
+  prompt("Copie o JSON:", JSON.stringify(pack));
+};
+$("#imp").onclick=()=>{
+  const txt=prompt("Cole o JSON exportado:");
+  if(!txt) return;
+  try{
+    const pack=JSON.parse(txt);
+    if(!pack.state) return toast("JSON inválido.");
+    S={...defaultState(),...pack.state};
+    save(); render();
+  }catch{toast("Falha ao importar.");}
+};
+$("#rst").onclick=()=>{
+  if(!confirm("Reset total?")) return;
+  S=defaultState(); save(); render();
+};
+
+/* ===================== INIT ===================== */
+render();
+</script>
+</body>
+</html>
+```
